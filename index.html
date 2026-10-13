@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>🔥 슈퍼 미니 사커 2026 - Super Mini Soccer</title>
+  <link rel="stylesheet" href="style.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Black+Han+Sans&family=Noto+Sans+KR:wght@400;700;900&display=swap" rel="stylesheet">
+</head>
+<body>
+  <div id="game-container">
+    <!-- 상단 스코어보드 & 상태바 -->
+    <header id="scoreboard">
+      <div class="team red-team">
+        <span class="flag" id="flag-home">🇰🇷</span>
+        <span class="team-name" id="name-home">RED FC</span>
+        <span class="score" id="score-home">0</span>
+      </div>
+      <div class="match-info">
+        <div class="timer" id="match-timer">02:00</div>
+        <div class="match-status" id="match-status">1ST HALF</div>
+      </div>
+      <div class="team blue-team">
+        <span class="score" id="score-away">0</span>
+        <span class="team-name" id="name-away">BLUE FC</span>
+        <span class="flag" id="flag-away">🇧🇷</span>
+      </div>
+    </header>
+
+    <!-- 캔버스 게임 화면 -->
+    <div id="canvas-wrapper">
+      <canvas id="gameCanvas" width="1050" height="650"></canvas>
+
+      <!-- 골 연출 오버레이 -->
+      <div id="goal-banner" class="hidden">
+        <div class="goal-text">⚽ GOOOOAAAL!! ⚽</div>
+        <div class="goal-sub" id="goal-scorer-text">환상적인 원더골 작렬!</div>
+      </div>
+
+      <!-- 모바일 가상 컨트롤러 (터치용) -->
+      <div id="touch-controls" class="hidden">
+        <div id="dpad">
+          <div class="dpad-btn up" data-key="KeyW">▲</div>
+          <div class="dpad-btn left" data-key="KeyA">◀</div>
+          <div class="dpad-btn right" data-key="KeyD">▶</div>
+          <div class="dpad-btn down" data-key="KeyS">▼</div>
+        </div>
+        <div id="action-buttons">
+          <button class="act-btn shoot-btn" data-key="Space">KICK (슛)</button>
+          <button class="act-btn dash-btn" data-key="ShiftLeft">DASH (질주)</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- 하단 조작 가이드 -->
+    <footer id="controls-hint">
+      <div class="control-badge"><b>[1P 조작]</b> 이동: <kbd>W</kbd><kbd>A</kbd><kbd>S</kbd><kbd>D</kbd> | 슛/패스: <kbd>Space</kbd> (길게 눌러 파워조절) | 질주: <kbd>Shift</kbd></div>
+      <div class="control-badge" id="hint-2p"><b>[2P 조작]</b> 이동: <kbd>↑</kbd><kbd>←</kbd><kbd>↓</kbd><kbd>→</kbd> | 슛/패스: <kbd>Enter</kbd> | 질주: <kbd>Ctrl</kbd></div>
+    </footer>
+
+    <!-- 시작 메뉴 모달 -->
+    <div id="menu-overlay" class="modal-overlay">
+      <div class="menu-card">
+        <h1 class="game-title">⚽ 슈퍼 미니 사커 2026 🔥</h1>
+        <p class="game-desc">화려한 드리블과 불꽃 슛으로 골망을 흔들어보세요!</p>
+
+        <div class="menu-section">
+          <label class="section-title">🎮 게임 모드</label>
+          <div class="btn-group" id="mode-selector">
+            <button class="select-btn active" data-mode="1p">1P vs 🤖 AI 대전</button>
+            <button class="select-btn" data-mode="2p">👥 2P 로컬 대전 (친구와 함께)</button>
+          </div>
+        </div>
+
+        <div class="menu-section" id="ai-diff-section">
+          <label class="section-title">⚡ AI 난이도</label>
+          <div class="btn-group" id="diff-selector">
+            <button class="select-btn" data-diff="easy">입문자 (조기축구회)</button>
+            <button class="select-btn active" data-diff="normal">프로 (K리그)</button>
+            <button class="select-btn" data-diff="hard">월드클래스 (챔스 결승)</button>
+          </div>
+        </div>
+
+        <div class="menu-section">
+          <label class="section-title">⏱️ 경기 규칙</label>
+          <div class="btn-group" id="rule-selector">
+            <button class="select-btn active" data-time="90">90초 단판 승부</button>
+            <button class="select-btn" data-time="180">3분 정규 경기</button>
+            <button class="select-btn" data-time="first3">3골 선취승 모드</button>
+          </div>
+        </div>
+
+        <div class="menu-section team-pick-section">
+          <div class="team-pick-box">
+            <label>홈팀 (1P)</label>
+            <select id="home-team-select">
+              <option value="korea" selected>🇰🇷 대한민국 (붉은 악마)</option>
+              <option value="brazil">🇧🇷 브라질 (삼바 축구)</option>
+              <option value="argentina">🇦🇷 아르헨티나 (탱고 군단)</option>
+              <option value="france">🇫🇷 프랑스 (레블뢰)</option>
+              <option value="england">🏴󠁧󠁢󠁥󠁮󠁧󠁿 잉글랜드 (삼사자 군단)</option>
+            </select>
+          </div>
+          <div class="vs-text">VS</div>
+          <div class="team-pick-box">
+            <label>원정팀 (2P / AI)</label>
+            <select id="away-team-select">
+              <option value="brazil" selected>🇧🇷 브라질 (삼바 축구)</option>
+              <option value="korea">🇰🇷 대한민국 (붉은 악마)</option>
+              <option value="argentina">🇦🇷 아르헨티나 (탱고 군단)</option>
+              <option value="france">🇫🇷 프랑스 (레블뢰)</option>
+              <option value="england">🏴󠁧󠁢󠁥󠁮󠁧󠁿 잉글랜드 (삼사자 군단)</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="menu-actions">
+          <button id="start-game-btn" class="glow-btn">킥오프! 게임 시작 ⚽</button>
+          <button id="sound-toggle-btn" class="sub-btn">🔊 사운드: 켜짐</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- 경기 종료 결과 모달 -->
+    <div id="result-overlay" class="modal-overlay hidden">
+      <div class="menu-card result-card">
+        <h2 id="result-title">🏆 승리! 🏆</h2>
+        <div class="result-score-display">
+          <span id="final-home-score">0</span> : <span id="final-away-score">0</span>
+        </div>
+        <p id="result-message" class="result-message">놀라운 집중력으로 승리를 쟁취했습니다!</p>
+        <div class="menu-actions">
+          <button id="restart-game-btn" class="glow-btn">다시 한 판 붙기 🔄</button>
+          <button id="back-to-menu-btn" class="sub-btn">메인 메뉴로 이동</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="game.js"></script>
+</body>
+</html>
